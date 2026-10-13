@@ -47,7 +47,25 @@ _FALLBACK_TEXT = (
 # icon. We swap those for this short note; the generated media still shows up in
 # the adk web Artifacts panel.
 _HTTP_URL_RE = re.compile(r"^https?://", re.I)
-_IMAGE_NOTE = "Image generated — open the Artifacts panel to view it."
+_IMAGE_NOTE = "Image generated - open the Artifacts panel to view it."
+
+
+def _clean_unicode(obj):
+    if isinstance(obj, str):
+        return (
+            obj.replace("•", " | ")
+            .replace("—", "-")
+            .replace("–", "-")
+            .replace("’", "'")
+            .replace("‘", "'")
+            .replace('“', '"')
+            .replace('”', '"')
+        )
+    if isinstance(obj, dict):
+        return {k: _clean_unicode(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_clean_unicode(v) for v in obj]
+    return obj
 
 
 def _wrap_a2ui_part(a2ui_message: dict) -> types.Part:
@@ -56,7 +74,7 @@ def _wrap_a2ui_part(a2ui_message: dict) -> types.Part:
         {
             "kind": "data",
             "metadata": {"mimeType": "application/json+a2ui"},
-            "data": a2ui_message,
+            "data": _clean_unicode(a2ui_message),
         }
     )
     blob_data = (
